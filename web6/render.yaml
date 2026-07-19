@@ -1,0 +1,43 @@
+# Render deployment configuration for the FundedFrens API server.
+# https://render.com/docs/yaml-spec
+
+services:
+  - type: web
+    name: fundedfrens-api
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: pnpm install && pnpm --filter @workspace/api-server run build
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+    healthCheckPath: /api/healthz
+    autoDeploy: true
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Postgres connection string — from Supabase → Settings → Database → Connection string
+      # Use the "Transaction" pooler URL (port 6543) for serverless/long-running services.
+      - key: DATABASE_URL
+        sync: false
+      # Supabase project URL — from Supabase → Settings → API
+      - key: SUPABASE_URL
+        sync: false
+      # Supabase service-role key — from Supabase → Settings → API → service_role (secret)
+      # NEVER expose this in the frontend.
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      # Solana wallet address that receives all challenge payments
+      - key: TREASURY_WALLET
+        sync: false
+      # Helius RPC endpoint for on-chain payment verification
+      # Format: https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
+      - key: HELIUS_RPC_URL
+        sync: false
+      # Comma-separated list of allowed CORS origins (Vercel frontend URLs)
+      # e.g. https://fundedfrens.com,https://www.fundedfrens.com
+      - key: ALLOWED_ORIGINS
+        sync: false
+      # Public URL of the website — used in referral links
+      - key: APP_URL
+        value: https://fundedfrens.com
+      # PORT is automatically set by Render — do NOT override it
