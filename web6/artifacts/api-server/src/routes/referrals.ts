@@ -1,9 +1,7 @@
 import { Router } from 'express';
-import { db } from '@workspace/db';
-import { profiles, referralEarnings, payouts } from '@workspace/db/schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
 import { requireAuth, type AuthenticatedRequest } from '../middlewares/auth.js';
 import type { Request, Response } from 'express';
+import { supabaseAdmin } from '../lib/supabaseAdmin.js';
 
 const router = Router();
 
@@ -14,12 +12,14 @@ const APP_URL = process.env.APP_URL ?? 'https://fundedfrens.com';
 // ---------------------------------------------------------------------------
 router.get('/v1/referrals/dashboard', requireAuth, async (req: Request, res: Response) => {
   const { id } = (req as AuthenticatedRequest).authUser;
+  const sb = supabaseAdmin();
 
   try {
-    const [profile] = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.auth_user_id, id));
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('referral_code')
+      .eq('auth_user_id', id)
+      .single();
 
     if (!profile) {
       res.status(404).json({ error: 'Profile not found' });
@@ -29,50 +29,46 @@ router.get('/v1/referrals/dashboard', requireAuth, async (req: Request, res: Res
     const referralCode = profile.referral_code ?? id.slice(0, 8).toUpperCase();
     const referralLink = `${APP_URL}/register?ref=${referralCode}`;
 
-    // Count registrations (users who signed up via this referral code)
-    const [regRow] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(profiles)
-      .where(eq(profiles.referred_by, id));
+    // Count registrations
+    const { count: registrationsCount } = await sb
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('referred_by', id);
 
-    const registrationsCount = regRow?.count ?? 0;
+    // Earnings
+    const { data: earningRows } = await sb
+      .from('referral_earnings')
+      .select('*')
+      .eq('referrer_id', id)
+      .order('created_at', { ascending: false });
 
-    // Earnings summary
-    const earningRows = await db
-      .select()
-      .from(referralEarnings)
-      .where(eq(referralEarnings.referrer_id, id))
-      .orderBy(desc(referralEarnings.created_at));
-
-    const pendingEarningsUsd = earningRows
+    const earnings = earningRows ?? [];
+    const pendingEarningsUsd = earnings
       .filter((e) => e.status === 'pending')
       .reduce((sum, e) => sum + Number(e.amount), 0);
-
-    const paidEarningsUsd = earningRows
+    const paidEarningsUsd = earnings
       .filter((e) => e.status === 'paid')
       .reduce((sum, e) => sum + Number(e.amount), 0);
-
-    const qualifiedPurchasesCount = earningRows.filter((e) => e.status !== 'cancelled').length;
-
+    const qualifiedPurchasesCount = earnings.filter((e) => e.status !== 'cancelled').length;
     const totalEarningsUsd = pendingEarningsUsd + paidEarningsUsd;
 
     res.json({
       referral_code: referralCode,
       referral_link: referralLink,
-      registrations_count: registrationsCount,
+      registrations_count: registrationsCount ?? 0,
       qualified_purchases_count: qualifiedPurchasesCount,
       pending_earnings_usd: pendingEarningsUsd,
       available_earnings_usd: pendingEarningsUsd,
       paid_earnings_usd: paidEarningsUsd,
       total_earnings_usd: totalEarningsUsd,
-      history: earningRows.map((e) => ({
+      history: earnings.map((e) => ({
         id: e.id,
         amount: Number(e.amount),
         status: e.status,
-        created_at: e.created_at.toISOString(),
+        created_at: e.created_at,
       })),
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch referral dashboard' });
   }
 });
@@ -90,18 +86,21 @@ router.post('/v1/payouts', requireAuth, async (req: Request, res: Response) => {
   }
 
   try {
-    const [payout] = await db
-      .insert(payouts)
-      .values({
+    const { data: payout, error } = await supabaseAdmin()
+      .from('payouts')
+      .insert({
         user_id: id,
         amount: String(amount),
         wallet_address,
         status: 'pending',
       })
-      .returning();
+      .select()
+      .single();
+
+    if (error) throw error;
 
     res.json(formatPayout(payout));
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to create payout request' });
   }
 });
@@ -113,14 +112,16 @@ router.get('/v1/payouts', requireAuth, async (req: Request, res: Response) => {
   const { id } = (req as AuthenticatedRequest).authUser;
 
   try {
-    const myPayouts = await db
-      .select()
-      .from(payouts)
-      .where(eq(payouts.user_id, id))
-      .orderBy(desc(payouts.created_at));
+    const { data: myPayouts, error } = await supabaseAdmin()
+      .from('payouts')
+      .select('*')
+      .eq('user_id', id)
+      .order('created_at', { ascending: false });
 
-    res.json(myPayouts.map(formatPayout));
-  } catch (err) {
+    if (error) throw error;
+
+    res.json((myPayouts ?? []).map(formatPayout));
+  } catch {
     res.status(500).json({ error: 'Failed to fetch payouts' });
   }
 });
@@ -128,7 +129,7 @@ router.get('/v1/payouts', requireAuth, async (req: Request, res: Response) => {
 // ---------------------------------------------------------------------------
 // Helper
 // ---------------------------------------------------------------------------
-function formatPayout(p: typeof payouts.$inferSelect) {
+function formatPayout(p: Record<string, unknown>) {
   return {
     id: p.id,
     user_id: p.user_id,
@@ -137,7 +138,7 @@ function formatPayout(p: typeof payouts.$inferSelect) {
     status: p.status,
     tx_signature: p.tx_signature ?? null,
     rejection_reason: p.rejection_reason ?? null,
-    created_at: p.created_at.toISOString(),
+    created_at: p.created_at,
   };
 }
 

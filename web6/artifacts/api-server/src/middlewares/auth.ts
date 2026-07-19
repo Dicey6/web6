@@ -1,31 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
 import type { Request, Response, NextFunction } from 'express';
-
-// ---------------------------------------------------------------------------
-// Supabase admin client — used only for JWT verification via getUser()
-// ---------------------------------------------------------------------------
-function getSupabaseAdmin() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!url || !key) {
-    throw new Error(
-      'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in the environment',
-    );
-  }
-
-  return createClient(url, key, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-}
-
-// Lazy singleton — created on first use so startup doesn't crash when env
-// vars are temporarily missing during local hot-reload.
-let _admin: ReturnType<typeof getSupabaseAdmin> | null = null;
-function supabaseAdmin() {
-  if (!_admin) _admin = getSupabaseAdmin();
-  return _admin;
-}
+import { supabaseAdmin } from '../lib/supabaseAdmin.js';
 
 // ---------------------------------------------------------------------------
 // Augment Express request with authenticated user info
@@ -38,7 +12,7 @@ export interface AuthenticatedRequest extends Request {
 }
 
 // ---------------------------------------------------------------------------
-// requireAuth middleware
+// requireAuth middleware — verifies Supabase JWT
 // ---------------------------------------------------------------------------
 export async function requireAuth(
   req: Request,
@@ -55,10 +29,7 @@ export async function requireAuth(
   const token = authHeader.slice(7);
 
   try {
-    const {
-      data: { user },
-      error,
-    } = await supabaseAdmin().auth.getUser(token);
+    const { data: { user }, error } = await supabaseAdmin().auth.getUser(token);
 
     if (error || !user) {
       res.status(401).json({ error: 'Invalid or expired token' });
@@ -71,7 +42,7 @@ export async function requireAuth(
     };
 
     next();
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Auth service unavailable' });
   }
 }
@@ -84,12 +55,10 @@ export async function requireAdmin(
   res: Response,
   next: NextFunction,
 ): Promise<void> {
-  // First verify the JWT
   await new Promise<void>((resolve) => {
     requireAuth(req, res, () => resolve());
   });
 
-  // If requireAuth already sent a response (401), res.headersSent will be true
   if (res.headersSent) return;
 
   const authReq = req as AuthenticatedRequest;
