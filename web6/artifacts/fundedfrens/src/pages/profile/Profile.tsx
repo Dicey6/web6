@@ -1,4 +1,5 @@
-import { useGetMyProfile, useUpdateMyProfile } from '@workspace/api-client-react';
+import { useGetMyProfile, useUpdateMyProfile, getGetMyProfileQueryKey, getGetDashboardQueryKey } from '@workspace/api-client-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2, User, Wallet } from 'lucide-react';
 
 const profileSchema = z.object({
@@ -18,6 +19,7 @@ const profileSchema = z.object({
 export default function Profile() {
   const { data: profile, isLoading } = useGetMyProfile();
   const updateProfile = useUpdateMyProfile();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof profileSchema>>({
@@ -36,6 +38,10 @@ export default function Profile() {
       }
     }, {
       onSuccess: () => {
+        // Invalidate both the profile and dashboard caches so the UI
+        // immediately reflects the saved values without requiring a page refresh.
+        queryClient.invalidateQueries({ queryKey: getGetMyProfileQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
         toast({ title: "Profile updated", description: "Your changes have been saved." });
       },
       onError: (err: any) => {
@@ -129,6 +135,3 @@ export default function Profile() {
     </DashboardLayout>
   );
 }
-
-// Needed for the generic import to work
-import { FormDescription } from '@/components/ui/form';
