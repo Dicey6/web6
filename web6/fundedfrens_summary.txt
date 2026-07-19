@@ -1,0 +1,405 @@
+================================================================
+FUNDEDFRENS — FULL REPO SUMMARY
+GitHub: https://github.com/Dicey6/web6
+================================================================
+
+OVERVIEW
+--------
+FundedFrens is a crypto prop firm platform for Solana meme coin traders.
+Users pay a one-time fee to take a trading challenge. If they pass, they
+get access to funded SOL capital and keep up to 90% of profits.
+
+Brand direction: Premium, clean, modern, trustworthy.
+Design inspiration: Stripe, Vercel, Linear, Coinbase.
+Avoids flashy "meme coin" aesthetics.
+
+================================================================
+ARCHITECTURE & TECH STACK
+================================================================
+
+Layer       | Technology                                  | Hosting
+------------|---------------------------------------------|----------
+Frontend    | Next.js 15, TypeScript, Tailwind, Framer    | Vercel
+Backend     | Python FastAPI, REST API (/api/v1)          | Render
+Database    | Supabase PostgreSQL                         | Supabase
+Auth        | Supabase Auth (email/password)              | Supabase
+Payments    | Native SOL on-chain (no payment processor)  | Solana Mainnet
+
+================================================================
+DIRECTORY STRUCTURE
+================================================================
+
+web6/
+├── frontend/         ← Next.js 15 app
+├── backend/          ← FastAPI Python app
+├── database/
+│   └── migrations/   ← 3 SQL migration files
+└── attached_assets/  ← Original build prompts & deploy logs
+
+================================================================
+FRONTEND (Next.js 15 App Router)
+================================================================
+
+PUBLIC PAGES
+- /                   Landing page: Hero, Why FundedFrens, How It Works, Plans Preview, FAQ
+- /challenge-plans    Full plan listing with pricing/rules, fetched live from API
+- /faq
+- /contact
+- /privacy
+- /terms
+- /risk-disclosure
+
+AUTH PAGES
+- /login              Email/password login via Supabase Auth
+- /register           Registration with email verification
+- /forgot-password    Password reset flow
+All forms use React Hook Form + Zod validation.
+
+PROTECTED PAGES (logged-in users only)
+- /dashboard          Challenge status, account info, referrals, Telegram status, activity
+- /dashboard/referrals Full referral earnings dashboard
+- /checkout/[slug]    Plan purchase flow
+- /pay/[orderId]      SOL payment screen (QR code + wallet address + countdown timer)
+- /profile            User profile management
+- /settings           Account settings
+
+ADMIN PAGES (/admin/*)
+- /admin/dashboard    Platform stats
+- /admin/users        User management
+- /admin/orders       Order management
+- /admin/challenges   Challenge plan CRUD
+- /admin/payments     Payment tracking
+- /admin/payouts      Payout request management
+- /admin/referrals    Referral overview
+- /admin/audit-logs   Full audit log viewer
+- /admin/settings     Platform settings
+
+KEY FRONTEND LIBRARIES
+- @supabase/supabase-js + @supabase/ssr  — auth & database
+- framer-motion                          — animations
+- react-hook-form + zod                  — forms & validation
+- lucide-react                           — icons
+- qrcode.react                           — SOL payment QR codes
+- clsx + tailwind-merge                  — class utilities
+
+================================================================
+BACKEND (FastAPI Python)
+================================================================
+
+BASE URL: /api/v1
+DOCS: /api/v1/docs (dev only, hidden in production)
+
+API ROUTERS
+-----------
+users      — Profile management, wallet management, Telegram account linking
+challenges — List plans, get plan by slug, user challenge status
+orders     — Create order, check payment status, cancel order
+referrals  — Referral dashboard, earnings history, payout requests
+admin      — User management, plan CRUD, order management, payouts (admin only)
+audit      — Audit log retrieval
+
+CORE SERVICES
+-------------
+challenge.py
+  - CRUD for challenge_plans table
+  - Activating user_challenge records on payment confirmation
+  - Snapshots all rules at purchase time (so plan rule changes don't affect active challenges)
+
+payment.py
+  - Creates orders with live SOL price conversion (USD → SOL)
+  - Polls Solana mainnet RPC for incoming payments (30-min expiry window)
+  - Verifies exact SOL amount (2-lamport tolerance for floating point)
+  - On confirmation: updates order/payment, activates challenge, processes referral commission
+
+solana_rpc.py
+  - Direct Solana mainnet JSON-RPC calls (no API key for basic use)
+  - getSignaturesForAddress — scans recent wallet transactions
+  - getTransaction — parses SOL transfer amounts by tracking balance deltas
+  - Note: Public RPC used; production should use Helius or QuickNode
+
+sol_price.py
+  - Fetches live SOL/USD price to calculate exact SOL required per plan
+  - Results cached in sol_price_cache table
+
+rule_engine.py
+  - Evaluates trading rules per user challenge:
+      PORTFOLIO_DRAWDOWN — static hard breach; fails challenge immediately
+      DAILY_DRAWDOWN     — daily hard breach; fails challenge immediately
+      PROFIT_TARGET      — marks challenge as passed
+      POSITION_SIZE      — exceeding limit freezes challenge
+      OPEN_POSITIONS     — exceeding limit freezes challenge
+  - Phase 3 will call this after every trade recorded via Telegram bot
+
+referral.py
+  - Unique referral code generated per user on registration
+  - Commission (% of plan price) credited on confirmed payments
+  - Earnings: pending → available → paid
+  - Payout requests to user Solana wallet
+
+audit.py
+  - Logs every significant action with user_id, action type, and details
+  - Events include: payment_confirmed, challenge_activated, challenge_failed,
+    challenge_frozen, account_freeze, account_reactivation, etc.
+
+DEPENDENCIES (requirements.txt)
+  fastapi, uvicorn, supabase, python-jose, httpx, pydantic,
+  pydantic-settings, python-multipart, slowapi, python-dotenv
+
+SECURITY
+  - JWT via Supabase
+  - Rate limiting: 60 req/min default (slowapi)
+  - CORS configured per environment
+  - API docs hidden in production
+
+================================================================
+DATABASE SCHEMA (Supabase PostgreSQL)
+================================================================
+
+MIGRATION 001 — CORE TABLES
+-----------------------------
+profiles
+  id, auth_user_id (FK → auth.users), email, username, role (user/admin),
+  telegram_status (linked/not_linked), wallet_address, created_at, updated_at
+
+wallets
+  id, user_id (FK → auth.users), address, chain (default: solana),
+  is_primary, created_at, updated_at
+  UNIQUE(user_id, address)
+
+telegram_links
+  id, user_id (FK → auth.users), telegram_id (BIGINT), telegram_username, linked_at
+
+challenges (legacy — replaced by challenge_plans in migration 003)
+  id, name, account_size, price, profit_target, max_drawdown, daily_drawdown,
+  min_trading_days, is_active, created_at, updated_at
+
+orders
+  id, user_id, challenge_id/challenge_plan_id, status, amount, currency,
+  plan_name, plan_slug, expected_sol, sol_price_usd, treasury_wallet,
+  expiry_time, tx_signature, created_at, updated_at
+  Statuses: pending | waiting_for_payment | payment_detected | confirming |
+            confirmed | activated | expired | cancelled | failed
+
+payments
+  id, order_id, user_id, expected_sol, received_sol, treasury_wallet,
+  status, tx_signature, expiry_time, confirmed_at, created_at, updated_at
+
+referrals
+  id, referrer_id, referred_id, referral_code, created_at
+
+referral_earnings
+  id, referral_id, order_id, amount, status (pending/paid/cancelled), created_at
+
+payout_requests
+  id, user_id, amount, wallet_address, status (pending/approved/rejected/paid/cancelled),
+  tx_signature, rejection_reason, created_at
+
+funded_accounts (Phase 3)
+  Tracks active funded trader accounts
+
+trades (Phase 3)
+  Individual trade records per funded account
+
+positions (Phase 3)
+  Open positions per funded account
+
+rule_violations
+  id, funded_account_id, user_id, rule_type, details, created_at
+
+analytics
+  id, user_id, event, metadata, created_at
+
+audit_logs
+  id, user_id, action, details, created_at
+
+platform_settings
+  Key-value store for platform configuration
+
+MIGRATION 002 — ROW LEVEL SECURITY
+------------------------------------
+RLS enabled on ALL tables.
+
+is_admin() function:
+  Returns TRUE if current auth.uid() maps to a profile with role='admin'
+
+prevent_role_self_escalation trigger:
+  Prevents authenticated users from changing their own role column.
+  Service role (FastAPI backend) bypasses this.
+
+Policies summary:
+  - Users: can only read/write their own rows
+  - Admins: bypass all restrictions via is_admin()
+  - Service role: full access (used by FastAPI backend)
+  - Challenge plans: public read for active ones
+  - Audit logs: insert only via service role; read own or admin
+
+MIGRATION 003 — PHASE 2 SCHEMA
+---------------------------------
+challenge_plans (replaces challenges table)
+  id, name, slug (UNIQUE), price_usd, funded_sol, funded_usd_estimate,
+  status (active/inactive/coming_soon/archived), display_order, description,
+  profit_target_pct, max_drawdown_pct, daily_drawdown_pct, min_trading_days,
+  max_position_size_pct, max_open_positions, reactivation_cost_pct,
+  created_at, updated_at
+
+user_challenges
+  id, user_id, challenge_plan_id, order_id, status, started_at, expires_at,
+  completed_at, failed_at, reactivated_at,
+  profit_target_pct, max_drawdown_pct (snapshots at purchase time),
+  created_at, updated_at
+  Statuses: pending | active | passed | failed | frozen | completed | reactivated
+
+challenge_rules
+  id, user_challenge_id, rule_type, threshold_value, current_value,
+  is_passing, last_evaluated_at, created_at, updated_at
+
+reactivations
+  id, user_id, user_challenge_id, order_id, created_at
+
+sol_price_cache
+  id, price_usd, fetched_at
+
+Trigger: handle_new_profile_referral
+  Fires after INSERT on profiles, auto-generates a referral code for new users.
+
+================================================================
+CHALLENGE PLANS (DATABASE-SEEDED)
+================================================================
+
+Name           | Price | Funded SOL | Display Order | Status
+---------------|-------|------------|---------------|--------
+Starter        | $15   | 5 SOL      | 1             | active
+Advanced       | $25   | 15 SOL     | 2             | active
+Professional   | $50   | 45 SOL     | 3             | active
+
+Rules (configurable per plan):
+  Profit Target: reach X% gain to pass evaluation
+  Max Drawdown:  equity must never fall below X% of starting balance (static)
+  Daily Drawdown: daily drawdown hard limit
+  Min Trading Days: minimum 5 days
+  No maximum trading time limit
+  Payout Split: up to 90% for the trader
+
+================================================================
+PAYMENT FLOW (END-TO-END)
+================================================================
+
+1. User selects a plan → clicks "Buy Challenge"
+2. Backend creates an order, fetches live SOL/USD price, calculates exact SOL amount
+3. A 30-minute payment window is created
+4. User sees treasury wallet address + QR code on /pay/[orderId]
+5. Frontend polls /api/v1/orders/{id}/payment-status every few seconds
+6. Backend scans treasury wallet's recent Solana transactions via mainnet RPC
+7. When a matching payment is found (within 2-lamport tolerance), it's confirmed
+8. Order → "activated", user_challenge record created, referral commission processed
+9. User gains access to their funded challenge account
+
+Treasury Wallet: CKayu8Va1UVy1jop6kRT5zsyk24urQQhJdqZwttVQwTt
+
+================================================================
+REFERRAL SYSTEM
+================================================================
+
+- Every user gets a unique referral code auto-generated at registration
+- Share referral link → referred user registers using it
+- When referred user completes a paid challenge purchase:
+    Referrer earns commission (% of plan price)
+- Earnings tracked through statuses: pending → available → paid
+- Users request payouts to their Solana wallet address
+- Payout requests require admin approval
+
+================================================================
+BUILD PHASES
+================================================================
+
+PHASE 1 (COMPLETE) — Foundation
+  - Supabase Auth setup (register, login, email verify, password reset)
+  - Landing page with all public pages
+  - Navigation, footer, layout components
+  - Full database schema (migration 001 + 002)
+  - Admin and user route groups with middleware
+  - Production-ready architecture
+
+PHASE 2 (COMPLETE) — Business Logic
+  - challenge_plans database table (migration 003)
+  - Orders system with SOL payment detection
+  - Live Solana RPC payment verification
+  - User challenge activation flow
+  - Rule engine (drawdown, profit target, position limits)
+  - Referral system with commission processing
+  - User dashboard with all cards
+  - Admin panel for all entities
+  - Audit logging throughout
+
+PHASE 3 (PLANNED) — Trading Integration
+  - Telegram bot integration for trade tracking
+  - Live trade and position recording
+  - Automated rule evaluation after each trade
+  - Real-time funded account management
+
+================================================================
+ENVIRONMENT VARIABLES REQUIRED
+================================================================
+
+FRONTEND (.env.local)
+  NEXT_PUBLIC_SUPABASE_URL         — Supabase project URL
+  NEXT_PUBLIC_SUPABASE_ANON_KEY    — Supabase anon/public key
+  NEXT_PUBLIC_API_URL              — Backend API URL (e.g. https://your-app.render.com)
+
+BACKEND (.env)
+  SUPABASE_URL                     — Supabase project URL
+  SUPABASE_SERVICE_ROLE_KEY        — Supabase service role key (full access)
+  SUPABASE_ANON_KEY                — Supabase anon key
+  JWT_SECRET                       — JWT signing secret
+  TREASURY_WALLET                  — Solana wallet address to receive payments
+  ENVIRONMENT                      — development | production
+  CORS_ORIGINS                     — Comma-separated allowed origins
+
+================================================================
+DEPLOYMENT
+================================================================
+
+Frontend → Vercel
+  1. Push to GitHub
+  2. Connect repo to Vercel
+  3. Set env vars in Vercel dashboard
+  4. Auto-deploys on push to main
+
+Backend → Render
+  1. Create Web Service on Render
+  2. Root directory: backend
+  3. Build command: pip install -r requirements.txt
+  4. Start command: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+  5. Set env vars in Render dashboard
+
+Database → Supabase
+  1. Run database/migrations/001_initial_schema.sql
+  2. Run database/migrations/002_rls_policies.sql
+  3. Run database/migrations/003_phase2_schema.sql
+  (All run via Supabase SQL Editor)
+
+================================================================
+NOTABLE TECHNICAL DECISIONS
+================================================================
+
+1. NO STRIPE/PAYPAL — Payments are 100% native SOL on-chain transfers.
+   Users send SOL directly to a treasury wallet. Backend verifies via Solana RPC.
+
+2. NO HARDCODED PLANS — Challenge plans are entirely database-driven.
+   Admins can create, edit, price, and activate/deactivate plans without code changes.
+
+3. RULE SNAPSHOTS — When a user purchases a challenge, all rules are snapshotted
+   into challenge_rules. Plan rule changes don't affect active challenges.
+
+4. PUBLIC SOLANA RPC — Currently uses api.mainnet-beta.solana.com (no API key).
+   Production should upgrade to Helius or QuickNode for reliability and rate limits.
+
+5. FOREIGN KEY CHAIN — Orders always reference challenge_plan_id.
+   Architecture: challenge_plans → orders → user_challenges → payments
+
+6. RLS EVERYWHERE — Every table has Row Level Security enabled.
+   FastAPI uses service role key to bypass RLS. Frontend uses anon key (RLS enforced).
+
+================================================================
+END OF SUMMARY
+================================================================

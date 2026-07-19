@@ -1,0 +1,577 @@
+FUNDEDFRENS V1 — PHASE 3 (PREMIUM UI, UX & PRODUCTION READINESS)
+
+You are continuing development of FundedFrens.
+
+Phase 1 (Foundation) is complete.
+
+Phase 2 (Business Logic) is complete.
+
+You are now entering Phase 3.
+
+This phase is NOT for adding new business features.
+
+This phase is NOT for changing database architecture.
+
+This phase is NOT for modifying business rules.
+
+This phase exists for one purpose:
+
+Transform FundedFrens into a premium, production-ready fintech platform.
+
+⸻
+
+STRICT DEVELOPMENT RULES
+
+Read these carefully.
+
+1. Do NOT redesign the backend architecture.
+2. Do NOT remove existing features.
+3. Do NOT change database tables unless absolutely necessary and approved.
+4. Do NOT change APIs unless required for stability.
+5. Do NOT modify payment logic.
+6. Do NOT modify challenge logic.
+7. Do NOT modify referral logic.
+8. Do NOT modify authentication.
+9. Do NOT modify the business model.
+10. Every visual improvement must preserve existing functionality.
+
+If a UI change requires backend changes, stop and document why before proceeding.
+
+⸻
+
+PROJECT ARCHITECTURE
+
+The architecture is fixed.
+
+Frontend
+Next.js + TypeScript
+
+Hosted on Vercel
+
+Backend
+FastAPI
+
+Hosted on Render
+
+Database
+Supabase PostgreSQL
+
+Authentication
+Supabase Auth
+
+Version Control
+GitHub
+
+Every completed improvement must be committed and pushed to GitHub.
+
+The project must remain deployable at all times.
+
+⸻
+
+DESIGN OBJECTIVE
+
+FundedFrens should not resemble a generic AI-generated crypto dashboard.
+
+Avoid:
+
+• Generic Tailwind layouts
+
+• Cookie-cutter SaaS templates
+
+• Large glowing gradients
+
+• Oversized shadows
+
+• Random animations
+
+• Typical “Web3” aesthetics
+
+Instead create a refined product that feels comparable to modern financial software.
+
+The interface should communicate:
+
+Trust
+
+Quality
+
+Discipline
+
+Professionalism
+
+Speed
+
+Clarity
+
+Confidence
+
+⸻
+
+DESIGN INSPIRATION
+
+Study the design principles—not the exact interfaces—of:
+
+Apple
+
+Stripe
+
+Linear
+
+Vercel
+
+Arc Browser
+
+Coinbase
+
+Notion
+
+The goal is to produce an original design inspired by high-quality product thinking.
+
+⸻
+
+DESIGN SYSTEM
+
+Create a complete design system if one does not already exist.
+
+Everything must use reusable tokens.
+
+Include:
+
+Colors
+
+Typography
+
+Spacing
+
+Grid
+
+Border Radius
+
+Elevation
+
+Glass Styles
+
+Animations
+
+Transitions
+
+Status Colors
+
+Icons
+
+Button Variants
+
+Input Variants
+
+Card Variants
+
+Modal Variants
+
+Do not style components independently.
+
+The design system must become the single source of truth.
+
+⸻
+
+LIQUID GLASS
+
+Introduce tasteful glass-inspired UI.
+
+Take inspiration from Apple’s modern Liquid Glass language.
+
+Do NOT copy Apple’s implementation.
+
+Use glass only where it improves the interface.
+
+Examples:
+
+Navigation
+
+Floating panels
+
+Dashboard widgets
+
+Dialogs
+
+Dropdowns
+
+Context menus
+
+Cards
+
+Glass effects should include:
+
+Background blur
+
+Subtle transparency
+
+Elegant borders
+
+Soft reflections
+
+Layered depth
+
+Smooth lighting
+
+Glass should never reduce readability.
+
+Accessibility always takes priority.
+
+⸻
+
+TYPOGRAPHY
+
+Review every text element.
+
+Improve:
+
+Hierarchy
+
+Consistency
+
+Spacing
+
+Line height
+
+Readability
+
+Alignment
+
+Avoid oversized headings.
+
+Avoid cramped paragraphs.
+
+Create a premium reading experience.
+
+⸻
+
+COLOR SYSTEM
+
+Primary
+
+White
+
+Secondary
+
+Charcoal
+
+Accent
+
+Solana Green
+
+Support
+
+Neutral Grays
+
+Success
+
+Green
+
+Warning
+
+Amber
+
+Danger
+
+Red
+
+Information
+
+Blue
+
+Avoid excessive gradients.
+
+Avoid neon colors.
+
+Avoid visual noise.
+
+⸻
+
+LANDING PAGE
+
+Completely refine:
+
+Hero
+
+How It Works
+
+Challenge Plans
+
+FAQ
+
+Footer
+
+The landing page should instantly communicate trust.
+
+Improve visual hierarchy before adding visual effects.
+
+⸻
+
+DASHBOARD
+
+Polish every dashboard page.
+
+Improve:
+
+Spacing
+
+Card Layout
+
+Statistics
+
+Sidebar
+
+Navigation
+
+Visual hierarchy
+
+Widgets
+
+Tables
+
+Charts
+
+Financial information should feel easy to scan.
+
+Avoid clutter.
+
+⸻
+
+ADMIN PANEL
+
+Upgrade every admin page.
+
+Improve:
+
+Tables
+
+Filters
+
+Search
+
+Bulk actions
+
+Status badges
+
+Statistics
+
+Navigation
+
+Admin workflows should be fast and intuitive.
+
+⸻
+
+COMPONENT REVIEW
+
+Review every reusable component.
+
+Buttons
+
+Forms
+
+Inputs
+
+Cards
+
+Tables
+
+Dropdowns
+
+Dialogs
+
+Notifications
+
+Badges
+
+Tabs
+
+Pagination
+
+Progress Bars
+
+Skeleton Loaders
+
+Loading States
+
+Empty States
+
+Error States
+
+Success States
+
+Every component must feel consistent.
+
+⸻
+
+RESPONSIVENESS
+
+Review every page.
+
+Desktop
+
+Laptop
+
+Tablet
+
+Mobile
+
+Fix:
+
+Overflow
+
+Spacing
+
+Alignment
+
+Navigation
+
+Touch targets
+
+No page should feel like a scaled-down desktop layout.
+
+⸻
+
+MOTION DESIGN
+
+Use Framer Motion professionally.
+
+Improve:
+
+Hover states
+
+Transitions
+
+Page changes
+
+Card interactions
+
+Loading sequences
+
+Success animations
+
+Error animations
+
+Keep animations subtle.
+
+Performance comes first.
+
+⸻
+
+PERFORMANCE
+
+Audit the application.
+
+Improve:
+
+Bundle size
+
+Code splitting
+
+Lazy loading
+
+Image optimization
+
+Font loading
+
+API requests
+
+Render performance
+
+Target excellent Lighthouse scores.
+
+⸻
+
+ACCESSIBILITY
+
+Review:
+
+Keyboard navigation
+
+ARIA labels
+
+Focus visibility
+
+Contrast ratios
+
+Form accessibility
+
+Readable font sizes
+
+The platform should be usable by as many people as possible.
+
+⸻
+
+QUALITY ASSURANCE
+
+Manually review every page.
+
+Fix:
+
+Broken layouts
+
+Typography inconsistencies
+
+Animation glitches
+
+Responsive issues
+
+Color inconsistencies
+
+Alignment issues
+
+Spacing problems
+
+Broken icons
+
+Visual artifacts
+
+Nothing should ship with obvious UI defects.
+
+⸻
+
+CODE QUALITY
+
+Refactor where appropriate.
+
+Remove duplicate UI code.
+
+Improve naming.
+
+Improve folder organization.
+
+Improve component reusability.
+
+Keep TypeScript strict.
+
+Document reusable components where useful.
+
+⸻
+
+GITHUB WORKFLOW
+
+After each major improvement:
+
+Commit with a meaningful message.
+
+Push to GitHub.
+
+Ensure the project remains deployable.
+
+Never leave the repository in a broken state.
+
+⸻
+
+IMPORTANT
+
+Do not begin Telegram bot development.
+
+Do not implement live trading.
+
+Do not add experimental features.
+
+Do not invent business logic.
+
+If you discover architectural issues, document them clearly instead of silently changing them.
+
+Your responsibility is to make FundedFrens look, feel, and perform like a premium fintech product while preserving the existing architecture and business logic.
+
+The phase is complete only when the application is visually cohesive, responsive, accessible, performant, and ready for production launch.

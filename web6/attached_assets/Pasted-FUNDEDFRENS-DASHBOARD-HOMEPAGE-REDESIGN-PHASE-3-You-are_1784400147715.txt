@@ -1,0 +1,635 @@
+FUNDEDFRENS — DASHBOARD & HOMEPAGE REDESIGN (PHASE 3)
+
+You are continuing development of an existing production project.
+
+Repository:
+https://github.com/Dicey6/web6
+
+IMPORTANT
+
+This is NOT a rebuild.
+
+This is NOT a new project.
+
+This is NOT a business logic update.
+
+The platform is already functional.
+
+Authentication works.
+
+Deployment works.
+
+The backend works.
+
+The API works.
+
+The database works.
+
+The payment architecture works.
+
+The challenge system works.
+
+Your responsibility is to redesign and improve the Frontend UI/UX while preserving every existing feature.
+
+⸻
+
+STRICT RULES
+
+DO NOT:
+
+* Change database schema.
+* Modify backend APIs.
+* Change authentication.
+* Change payment verification.
+* Change referral logic.
+* Change challenge logic.
+* Break deployment.
+* Break GitHub workflow.
+* Introduce new bugs.
+
+The project must remain deployable to:
+
+* GitHub
+* Vercel (Frontend)
+* Render (Backend)
+* Supabase
+
+Every redesign must only improve the presentation layer.
+
+⸻
+
+PRIMARY OBJECTIVE
+
+Redesign the entire dashboard experience and significantly improve the homepage.
+
+The current dashboard feels generic and lacks the information expected from a professional crypto prop firm.
+
+The homepage should better communicate exactly what FundedFrens is and how it works.
+
+Everything should feel like premium financial software.
+
+⸻
+
+DESIGN LANGUAGE
+
+Avoid the typical AI-generated crypto dashboard.
+
+Avoid generic Tailwind layouts.
+
+Avoid cookie-cutter cards.
+
+Avoid oversized gradients.
+
+Avoid flashy meme coin styling.
+
+Instead, take inspiration from the design principles of:
+
+* Apple
+* Stripe
+* Linear
+* Vercel
+* Arc Browser
+* Coinbase
+* Notion
+
+Create an original design inspired by those principles.
+
+Use:
+
+* Excellent typography
+* Spacious layouts
+* Strong information hierarchy
+* Subtle Liquid Glass effects
+* Soft blur
+* Elegant transparency
+* Premium spacing
+* Smooth animations
+* Consistent component styling
+
+Glass effects should improve depth without reducing readability.
+
+⸻
+
+HOMEPAGE REDESIGN
+
+Keep the existing routes and functionality but improve the content and presentation.
+
+The homepage should clearly explain FundedFrens.
+
+Sections should include:
+
+Hero
+
+Clearly explain:
+
+FundedFrens is a crypto prop firm built specifically for Solana traders.
+
+Users purchase an evaluation challenge.
+
+If they meet the firm’s trading rules, they gain access to a funded account and receive a share of trading profits.
+
+Primary CTA:
+
+* Buy Challenge
+
+Secondary CTA:
+
+* View Challenge Plans
+
+⸻
+
+How It Works
+
+Display the full user journey.
+
+1. Create an account.
+2. Choose a challenge plan.
+3. Pay using SOL.
+4. Receive your evaluation account.
+5. Complete the challenge while following the rules.
+6. Pass the evaluation.
+7. Receive a funded account.
+8. Trade and earn a percentage of the profits.
+
+Use a visual timeline instead of plain text.
+
+⸻
+
+Challenge Plans
+
+Display all plans dynamically from the database.
+
+Starter
+
+Price:
+$15
+
+Funded Capital:
+5 SOL
+Approx. $350
+
+Advanced
+
+Price:
+$25
+
+Funded Capital:
+15 SOL
+Approx. $1,100
+
+Professional
+
+Price:
+$50
+
+Funded Capital:
+45 SOL
+Approx. $3,500
+
+Each plan should clearly display:
+
+* Purchase price
+* Funded amount
+* Minimum trading days
+* Maximum position size
+* Maximum open positions
+* Reactivation availability
+* Current status
+
+Do NOT hardcode values that already exist in the database.
+
+⸻
+
+Trading Rules
+
+Clearly explain the firm’s rules.
+
+Evaluation Period:
+
+21 days
+
+Minimum Trading Days:
+
+5
+
+Required Win Rate:
+
+75%
+
+Maximum Position Size:
+
+30%
+
+Maximum Open Positions:
+
+3
+
+Portfolio Loss Limit:
+
+50%
+
+Holding overnight:
+
+Allowed
+
+Trading hours:
+
+24/7
+
+Supported Launchpads:
+
+All Solana launchpads.
+
+Explain that traders are free to use their own strategy as long as they remain within the firm’s risk management rules.
+
+⸻
+
+What We Track
+
+Explain platform analytics.
+
+Every trade is tracked.
+
+Metrics include:
+
+* Entry
+* Exit
+* PnL %
+* Hold Time
+* Position Size
+* Win / Loss
+* Peak Unrealized Profit
+* Maximum Adverse Excursion
+* Risk Taken
+
+Display these visually.
+
+⸻
+
+Referral Program
+
+Explain:
+
+Every registered user receives a unique referral code.
+
+When someone registers using that code and purchases their first challenge:
+
+The referrer earns a commission.
+
+Referral earnings are tracked inside the dashboard.
+
+Payout requests are submitted through the platform.
+
+⸻
+
+Reactivation
+
+Explain:
+
+If a trader loses their account by violating firm rules:
+
+They may reactivate it.
+
+Reactivation costs 40% of the original challenge price.
+
+The challenge continues under the firm’s policies.
+
+⸻
+
+FAQ
+
+Expand significantly.
+
+Include:
+
+How do I get funded?
+
+What happens if I fail?
+
+Can I hold overnight?
+
+Can I trade anytime?
+
+Which launchpads are supported?
+
+How do referrals work?
+
+How do payouts work?
+
+How are payments verified?
+
+Do I need KYC?
+
+How is my performance tracked?
+
+⸻
+
+DASHBOARD REDESIGN
+
+Completely redesign the dashboard.
+
+The dashboard should feel like premium trading software.
+
+It should immediately answer:
+
+Who am I?
+
+What account do I have?
+
+What is my current status?
+
+What should I do next?
+
+How am I performing?
+
+⸻
+
+Dashboard Hero
+
+Display:
+
+Welcome message
+
+Current Challenge
+
+Challenge Status
+
+Funded Amount
+
+Current Phase
+
+Quick Action buttons
+
+⸻
+
+Account Overview
+
+Display:
+
+Challenge Plan
+
+Purchase Date
+
+Activation Date
+
+Evaluation Progress
+
+Trading Days Completed
+
+Remaining Days
+
+Challenge Status
+
+Current Profit Split
+
+⸻
+
+Performance Overview
+
+Display:
+
+Current Win Rate
+
+Current PnL
+
+Profit Target Progress
+
+Portfolio Drawdown
+
+Daily Drawdown
+
+Maximum Position Size
+
+Current Position Size
+
+Open Positions
+
+Trades Completed
+
+⸻
+
+Analytics
+
+Create professional charts.
+
+Include:
+
+Equity Curve
+
+Daily Performance
+
+Win / Loss Ratio
+
+Average Hold Time
+
+Average Position Size
+
+Peak Unrealized Profit
+
+Maximum Adverse Excursion
+
+Risk Exposure
+
+Recent Trade History
+
+Charts should feel like financial software.
+
+⸻
+
+Trading Rules
+
+Create a dedicated section showing every active rule.
+
+Each rule should display:
+
+Current value
+
+Allowed value
+
+Progress
+
+Status
+
+Passed rules should be visually different from warnings.
+
+⸻
+
+Referral Center
+
+Display:
+
+Referral Code
+
+Referral Link
+
+Copy Button
+
+Total Referrals
+
+Successful Referrals
+
+Pending Earnings
+
+Available Earnings
+
+Paid Earnings
+
+Request Payout Button
+
+⸻
+
+Payments
+
+Display:
+
+Current Orders
+
+Payment History
+
+Challenge Purchases
+
+Reactivation Payments
+
+Current Payment Status
+
+Transaction Signatures (where applicable)
+
+⸻
+
+Activity Timeline
+
+Create a timeline.
+
+Examples:
+
+Challenge Purchased
+
+Payment Confirmed
+
+Challenge Activated
+
+Referral Earned
+
+Profile Updated
+
+Challenge Passed
+
+Challenge Failed
+
+Account Reactivated
+
+⸻
+
+Telegram
+
+Create a placeholder card.
+
+Display:
+
+Connection Status
+
+Bot ID (when available)
+
+Telegram integration is coming in Version 2.
+
+Do NOT build Telegram functionality.
+
+⸻
+
+Profile Summary
+
+Display:
+
+Username
+
+Email
+
+Wallet
+
+Account Created
+
+Verification Status
+
+Role
+
+Profile completeness
+
+⸻
+
+RESPONSIVENESS
+
+Desktop
+
+Laptop
+
+Tablet
+
+Mobile
+
+Every page should be redesigned for all screen sizes.
+
+No layout should feel like a compressed desktop page.
+
+⸻
+
+MOTION
+
+Use Framer Motion carefully.
+
+Improve:
+
+Hover
+
+Loading
+
+Transitions
+
+Cards
+
+Navigation
+
+Keep animations subtle.
+
+⸻
+
+PERFORMANCE
+
+Do not reduce performance.
+
+Optimize:
+
+Images
+
+Components
+
+Bundle Size
+
+Lazy Loading
+
+Animations
+
+⸻
+
+FINAL REQUIREMENTS
+
+When complete:
+
+Review every page.
+
+Review every component.
+
+Review every spacing decision.
+
+Review every typography decision.
+
+Review every interaction.
+
+Everything should feel premium.
+
+The final result should resemble a modern fintech platform rather than a typical crypto website.
+
+Preserve all functionality.
+
+Do not introduce regressions.
+
+The application must remain deployable and production-ready at all times.

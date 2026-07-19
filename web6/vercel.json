@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pnpm --filter @workspace/fundedfrens run build",
+  "outputDirectory": "artifacts/fundedfrens/dist",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

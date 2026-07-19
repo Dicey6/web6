@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "FundedFrens"
+version = "1.0.0"
+id = "artifacts/fundedfrens"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23381
+
+[services.development]
+run = "pnpm --filter @workspace/fundedfrens run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/fundedfrens", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/fundedfrens/dist"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23381"
+BASE_PATH = "/"

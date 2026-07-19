@@ -1,0 +1,332 @@
+FundedFrens Backend Recovery & Integration Task
+
+Your task is NOT to redesign, restructure, or rewrite this project.
+
+Your objective is to recover the existing implementation, understand how both repositories work together, and complete the missing backend functionality while preserving the current architecture.
+
+Repositories
+
+Website Repository:
+https://github.com/Dicey6/web6
+
+Telegram Bot Repository:
+https://github.com/Dicey6/frensbot
+
+Clone both repositories before making any changes.
+
+Do not work on only one repository.
+
+The website and Telegram bot are part of the same platform and share the same Supabase project.
+
+You must understand both projects before writing or modifying any code.
+
+⸻
+
+Phase 1 — Repository Analysis
+
+Do not generate code immediately.
+
+First, inspect both repositories completely.
+
+Understand:
+
+Website
+
+* Project structure
+* Authentication flow
+* Dashboard
+* User profile system
+* Challenge system
+* Referral system
+* Payout system
+* API routes
+* Existing backend logic
+* Supabase integration
+* Database access layer
+
+Telegram Bot
+
+* Project structure
+* Supabase integration
+* Trading engine
+* User identification
+* Telegram linking
+* Trading flow
+* Current implementation status
+* Database usage
+
+⸻
+
+Phase 2 — Database Analysis
+
+Both repositories use the same Supabase database.
+
+Read the schema completely.
+
+Understand:
+
+* profiles
+* challenge_plans
+* user_challenges
+* orders
+* payouts
+* referral tables
+* activity tables
+* every existing relationship
+
+Determine exactly:
+
+* what already exists
+* what is missing
+* what should be reused
+* what should never be duplicated
+
+Do not create duplicate tables.
+
+Do not create duplicate APIs.
+
+Do not create duplicate business logic.
+
+Everything must integrate with the existing schema.
+
+⸻
+
+Phase 3 — Website Backend Audit
+
+The frontend UI is already complete.
+
+Do NOT redesign anything.
+
+Do NOT replace components.
+
+Do NOT change layouts.
+
+The issue is backend functionality.
+
+Audit every existing feature.
+
+Specifically verify:
+
+Profile
+
+* username updates
+* wallet address updates
+* persistence to Supabase
+* loading saved values
+* validation
+* error handling
+
+⸻
+
+Telegram
+
+Implement the complete linking flow.
+
+The website should:
+
+* generate secure one-time Telegram linking tokens
+* store them in Supabase
+* expire them after use or timeout
+* display Telegram connection status
+* allow unlinking
+
+The Telegram bot will consume these tokens.
+
+Do not build a second authentication system.
+
+⸻
+
+Dashboard
+
+Every dashboard component should display real data.
+
+Nothing should be placeholder.
+
+Verify:
+
+* active challenge
+* challenge status
+* challenge tier
+* balance
+* PnL
+* challenge progress
+* referral earnings
+* payout information
+* Telegram status
+
+Every card should load from Supabase.
+
+⸻
+
+Challenge System
+
+Verify:
+
+* active challenges
+* completed challenges
+* failed challenges
+* account status
+* challenge purchases
+* challenge retrieval
+
+⸻
+
+Referrals
+
+Verify:
+
+* referral codes
+* referral earnings
+* first purchase commission
+* referral history
+
+⸻
+
+Payouts
+
+Verify:
+
+* payout requests
+* payout history
+* payout status
+
+⸻
+
+Authentication
+
+Verify:
+
+* Supabase Auth
+* JWT validation
+* protected routes
+* session persistence
+
+⸻
+
+API
+
+Inspect every endpoint.
+
+Repair broken endpoints.
+
+Connect missing endpoints.
+
+Reuse existing logic wherever possible.
+
+⸻
+
+Supabase
+
+Inspect every query.
+
+Repair broken queries.
+
+Repair failed inserts.
+
+Repair failed updates.
+
+Repair failed reads.
+
+Repair failed deletes.
+
+Everything should function correctly.
+
+⸻
+
+Phase 4 — Telegram Bot Verification
+
+Do NOT redesign the bot.
+
+Do NOT change its architecture.
+
+Do NOT reorganize files.
+
+Keep the existing project structure.
+
+Only verify that:
+
+* it connects correctly to Supabase
+* it can identify linked users
+* it reads active challenges correctly
+* it shares data correctly with the website
+* no duplicated logic exists
+
+If backend adjustments are required for compatibility, implement the smallest possible changes.
+
+⸻
+
+Project Rules
+
+Do NOT:
+
+* redesign UI
+* refactor the architecture
+* reorganize files
+* rename existing components
+* split projects
+* introduce unnecessary abstractions
+* create duplicate services
+* create duplicate authentication
+* replace Supabase
+* change the current project structure unless absolutely required to fix a critical issue
+
+Keep the architecture intact.
+
+Only repair and complete missing functionality.
+
+⸻
+
+Testing
+
+Before finishing:
+
+Test every page.
+
+Test every button.
+
+Test every form.
+
+Test every API endpoint.
+
+Test every database query.
+
+Test profile updates.
+
+Test wallet saving.
+
+Test Telegram linking.
+
+Test dashboard loading.
+
+Test challenge retrieval.
+
+Test referrals.
+
+Test payouts.
+
+Test website ↔ bot synchronization.
+
+Everything should work end-to-end using the shared Supabase database.
+
+⸻
+
+Deliverables
+
+When finished, provide a report containing:
+
+1. Every issue discovered.
+2. Every issue fixed.
+3. Database changes (if any).
+4. API changes (if any).
+5. Remaining issues (if any).
+6. Confirmation that:
+    * The website backend is fully functional.
+    * The Telegram bot integrates correctly.
+    * Both repositories synchronize correctly through the shared Supabase database.
+    * The system is ready for production testing.
+
+Do not stop after fixing one issue.
+
+Continue until the backend is complete and all existing functionality works as intended.
+
+Preserve the existing UI and overall architecture throughout the process.

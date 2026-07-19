@@ -1,0 +1,1 @@
+- [FundedFrens backend fix](fundedfrens-backend.md) — Express API was a skeleton; all routes, auth middleware, and DB schema added in commit 0273ee3.

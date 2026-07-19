@@ -1,0 +1,1078 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: FundedFrens API — Solana meme coin prop trading platform
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: plans
+    description: Challenge plan operations
+  - name: users
+    description: User and profile operations
+  - name: orders
+    description: Order and payment operations
+  - name: referrals
+    description: Referral and payout operations
+  - name: admin
+    description: Admin operations
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /v1/challenge-plans:
+    get:
+      operationId: listChallengePlans
+      tags: [plans]
+      summary: List active challenge plans (public)
+      responses:
+        "200":
+          description: Active challenge plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChallengePlan"
+
+  /v1/challenge-plans/{slug}:
+    get:
+      operationId: getChallengePlan
+      tags: [plans]
+      summary: Get a challenge plan by slug (public)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Challenge plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChallengePlan"
+
+  /v1/users/profile:
+    get:
+      operationId: getMyProfile
+      tags: [users]
+      summary: Get authenticated user profile
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+    patch:
+      operationId: updateMyProfile
+      tags: [users]
+      summary: Update authenticated user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /v1/users/dashboard:
+    get:
+      operationId: getDashboard
+      tags: [users]
+      summary: Get dashboard summary for authenticated user
+      responses:
+        "200":
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardData"
+
+  /v1/my/challenges:
+    get:
+      operationId: getMyChallenges
+      tags: [users]
+      summary: Get all challenges for the current user
+      responses:
+        "200":
+          description: User challenges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserChallenge"
+
+  /v1/users/telegram/token:
+    post:
+      operationId: generateTelegramToken
+      tags: [users]
+      summary: Generate a one-time Telegram link token (valid 10 minutes)
+      responses:
+        "200":
+          description: Telegram link token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelegramLinkToken"
+
+  /v1/users/telegram:
+    delete:
+      operationId: unlinkTelegram
+      tags: [users]
+      summary: Unlink Telegram account from profile
+      responses:
+        "200":
+          description: Updated profile with telegram unlinked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /v1/orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a new order and generate SOL payment details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "200":
+          description: Created order with payment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+    get:
+      operationId: listMyOrders
+      tags: [orders]
+      summary: List my orders
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Paginated order list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderList"
+
+  /v1/orders/{orderId}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get a specific order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /v1/orders/{orderId}/cancel:
+    post:
+      operationId: cancelOrder
+      tags: [orders]
+      summary: Cancel an order
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Cancelled order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /v1/orders/{orderId}/payment-status:
+    get:
+      operationId: pollPaymentStatus
+      tags: [orders]
+      summary: Poll payment status — call every 5 seconds from payment page
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Payment status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentStatus"
+
+  /v1/orders/{orderId}/confirm:
+    post:
+      operationId: confirmOrder
+      tags: [orders]
+      summary: Confirm payment with a Solana transaction signature — activates the challenge
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderConfirmInput"
+      responses:
+        "200":
+          description: Activated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /v1/referrals/dashboard:
+    get:
+      operationId: getReferralDashboard
+      tags: [referrals]
+      summary: Get referral dashboard data
+      responses:
+        "200":
+          description: Referral dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReferralDashboard"
+
+  /v1/payouts:
+    post:
+      operationId: createPayout
+      tags: [referrals]
+      summary: Request a payout to Solana wallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayoutInput"
+      responses:
+        "200":
+          description: Created payout request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payout"
+    get:
+      operationId: listMyPayouts
+      tags: [referrals]
+      summary: List my payout requests
+      responses:
+        "200":
+          description: List of payouts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payout"
+
+  /v1/admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Get platform-wide statistics
+      responses:
+        "200":
+          description: Admin stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /v1/admin/users:
+    get:
+      operationId: listAdminUsers
+      tags: [admin]
+      summary: List all users with optional search
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated user list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUserList"
+
+  /v1/admin/users/{userId}:
+    get:
+      operationId: getAdminUser
+      tags: [admin]
+      summary: Get a specific user by ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Admin user detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+
+  /v1/admin/orders:
+    get:
+      operationId: listAdminOrders
+      tags: [admin]
+      summary: List all orders (admin)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Paginated order list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderList"
+
+  /v1/admin/orders/expire-stale:
+    post:
+      operationId: expireStaleOrders
+      tags: [admin]
+      summary: Expire all stale pending orders
+      responses:
+        "200":
+          description: Expire result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpireResult"
+
+  /v1/admin/challenge-plans:
+    get:
+      operationId: listAdminChallengePlans
+      tags: [admin]
+      summary: List all challenge plans including inactive (admin)
+      responses:
+        "200":
+          description: All challenge plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChallengePlan"
+    post:
+      operationId: createAdminChallengePlan
+      tags: [admin]
+      summary: Create a new challenge plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChallengePlanInput"
+      responses:
+        "200":
+          description: Created challenge plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChallengePlan"
+
+  /v1/admin/challenge-plans/{planId}:
+    patch:
+      operationId: updateAdminChallengePlan
+      tags: [admin]
+      summary: Update a challenge plan
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChallengePlanUpdate"
+      responses:
+        "200":
+          description: Updated challenge plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChallengePlan"
+
+  /v1/admin/payouts:
+    get:
+      operationId: listAdminPayouts
+      tags: [admin]
+      summary: List all payout requests (admin)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: All payout requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payout"
+
+  /v1/admin/payouts/{payoutId}/approve:
+    post:
+      operationId: approveAdminPayout
+      tags: [admin]
+      summary: Approve a payout request
+      parameters:
+        - name: payoutId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayoutApproveInput"
+      responses:
+        "200":
+          description: Approved payout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payout"
+
+  /v1/admin/payouts/{payoutId}/reject:
+    post:
+      operationId: rejectAdminPayout
+      tags: [admin]
+      summary: Reject a payout request
+      parameters:
+        - name: payoutId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayoutRejectInput"
+      responses:
+        "200":
+          description: Rejected payout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payout"
+
+  /v1/admin/referrals:
+    get:
+      operationId: listAdminReferrals
+      tags: [admin]
+      summary: List all referrals (admin)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Referrals list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReferralList"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ChallengePlan:
+      type: object
+      required: [id, name, slug, price_usd, funded_sol, status, display_order, profit_target_pct, max_drawdown_pct, daily_drawdown_pct, min_trading_days, max_position_size_pct, max_open_positions, reactivation_cost_pct]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        price_usd:
+          type: number
+        funded_sol:
+          type: number
+        funded_usd_estimate:
+          type: ["number", "null"]
+        status:
+          type: string
+          enum: [active, inactive, coming_soon, archived]
+        display_order:
+          type: integer
+        description:
+          type: ["string", "null"]
+        profit_target_pct:
+          type: number
+        max_drawdown_pct:
+          type: number
+        daily_drawdown_pct:
+          type: number
+        min_trading_days:
+          type: integer
+        max_position_size_pct:
+          type: number
+        max_open_positions:
+          type: integer
+        reactivation_cost_pct:
+          type: number
+        created_at:
+          type: ["string", "null"]
+        updated_at:
+          type: ["string", "null"]
+
+    ChallengePlanInput:
+      type: object
+      required: [name, slug, price_usd, funded_sol, profit_target_pct, max_drawdown_pct, daily_drawdown_pct, min_trading_days, max_position_size_pct, max_open_positions, reactivation_cost_pct]
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        price_usd:
+          type: number
+        funded_sol:
+          type: number
+        status:
+          type: string
+          enum: [active, inactive, coming_soon, archived]
+        display_order:
+          type: integer
+        description:
+          type: string
+        profit_target_pct:
+          type: number
+        max_drawdown_pct:
+          type: number
+        daily_drawdown_pct:
+          type: number
+        min_trading_days:
+          type: integer
+        max_position_size_pct:
+          type: number
+        max_open_positions:
+          type: integer
+        reactivation_cost_pct:
+          type: number
+
+    ChallengePlanUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        price_usd:
+          type: number
+        funded_sol:
+          type: number
+        status:
+          type: string
+          enum: [active, inactive, coming_soon, archived]
+        display_order:
+          type: integer
+        description:
+          type: string
+        profit_target_pct:
+          type: number
+        max_drawdown_pct:
+          type: number
+        daily_drawdown_pct:
+          type: number
+        min_trading_days:
+          type: integer
+        max_position_size_pct:
+          type: number
+        max_open_positions:
+          type: integer
+        reactivation_cost_pct:
+          type: number
+
+    UserProfile:
+      type: object
+      required: [id, auth_user_id, email, role, telegram_status, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+        auth_user_id:
+          type: string
+        email:
+          type: string
+        username:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [user, admin]
+        telegram_status:
+          type: string
+          enum: [linked, not_linked]
+        telegram_username:
+          type: ["string", "null"]
+        wallet_address:
+          type: ["string", "null"]
+        referral_code:
+          type: ["string", "null"]
+        created_at:
+          type: string
+        updated_at:
+          type: string
+
+    ProfileUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+        wallet_address:
+          type: string
+
+    TelegramLinkToken:
+      type: object
+      required: [token, expires_at]
+      properties:
+        token:
+          type: string
+          description: 8-character uppercase alphanumeric token to send via /link command in Telegram
+        expires_at:
+          type: string
+          description: ISO timestamp when this token expires (10 minutes from generation)
+
+    DashboardData:
+      type: object
+      required: [profile, referral_count, recent_activity]
+      properties:
+        profile:
+          $ref: "#/components/schemas/UserProfile"
+        challenge_status:
+          type: ["string", "null"]
+        referral_code:
+          type: ["string", "null"]
+        referral_count:
+          type: integer
+        recent_activity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityLog"
+
+    ActivityLog:
+      type: object
+      required: [id, action, created_at]
+      properties:
+        id:
+          type: integer
+        action:
+          type: string
+        details:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    UserChallenge:
+      type: object
+      required: [id, user_id, challenge_plan_id, status, created_at]
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+        challenge_plan_id:
+          type: integer
+        order_id:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [pending, active, passed, failed, frozen, completed, reactivated]
+        started_at:
+          type: ["string", "null"]
+        expires_at:
+          type: ["string", "null"]
+        completed_at:
+          type: ["string", "null"]
+        failed_at:
+          type: ["string", "null"]
+        profit_target_pct:
+          type: ["number", "null"]
+        max_drawdown_pct:
+          type: ["number", "null"]
+        plan:
+          $ref: "#/components/schemas/ChallengePlan"
+        created_at:
+          type: string
+
+    OrderInput:
+      type: object
+      required: [challenge_plan_id]
+      properties:
+        challenge_plan_id:
+          type: integer
+        referral_code:
+          type: ["string", "null"]
+
+    OrderConfirmInput:
+      type: object
+      required: [tx_signature]
+      properties:
+        tx_signature:
+          type: string
+
+    Order:
+      type: object
+      required: [id, user_id, status, amount, currency, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+        challenge_plan_id:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [pending, waiting_for_payment, payment_detected, confirming, confirmed, activated, expired, cancelled, failed]
+        amount:
+          type: number
+        currency:
+          type: string
+        plan_name:
+          type: ["string", "null"]
+        plan_slug:
+          type: ["string", "null"]
+        expected_sol:
+          type: ["number", "null"]
+        sol_price_usd:
+          type: ["number", "null"]
+        treasury_wallet:
+          type: ["string", "null"]
+        expiry_time:
+          type: ["string", "null"]
+        payment_status:
+          type: ["string", "null"]
+        tx_signature:
+          type: ["string", "null"]
+        created_at:
+          type: string
+        updated_at:
+          type: string
+
+    OrderList:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    PaymentStatus:
+      type: object
+      required: [order_id, order_status, challenge_activated]
+      properties:
+        order_id:
+          type: integer
+        order_status:
+          type: string
+        payment_status:
+          type: ["string", "null"]
+        expected_sol:
+          type: ["number", "null"]
+        received_sol:
+          type: ["number", "null"]
+        treasury_wallet:
+          type: ["string", "null"]
+        tx_signature:
+          type: ["string", "null"]
+        expiry_time:
+          type: ["string", "null"]
+        confirmed_at:
+          type: ["string", "null"]
+        seconds_remaining:
+          type: ["integer", "null"]
+        challenge_activated:
+          type: boolean
+
+    ReferralDashboard:
+      type: object
+      required: [referral_code, referral_link, registrations_count, qualified_purchases_count, pending_earnings_usd, available_earnings_usd, paid_earnings_usd, total_earnings_usd, history]
+      properties:
+        referral_code:
+          type: string
+        referral_link:
+          type: string
+        registrations_count:
+          type: integer
+        qualified_purchases_count:
+          type: integer
+        pending_earnings_usd:
+          type: number
+        available_earnings_usd:
+          type: number
+        paid_earnings_usd:
+          type: number
+        total_earnings_usd:
+          type: number
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReferralEarning"
+
+    ReferralEarning:
+      type: object
+      required: [id, amount, status, created_at]
+      properties:
+        id:
+          type: integer
+        amount:
+          type: number
+        status:
+          type: string
+          enum: [pending, paid, cancelled]
+        created_at:
+          type: string
+
+    PayoutInput:
+      type: object
+      required: [amount, wallet_address]
+      properties:
+        amount:
+          type: number
+        wallet_address:
+          type: string
+
+    Payout:
+      type: object
+      required: [id, user_id, amount, wallet_address, status, created_at]
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+        amount:
+          type: number
+        wallet_address:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected, paid, cancelled]
+        tx_signature:
+          type: ["string", "null"]
+        rejection_reason:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    AdminStats:
+      type: object
+      required: [total_users, users_today, active_users, audit_logs]
+      properties:
+        total_users:
+          type: integer
+        users_today:
+          type: integer
+        active_users:
+          type: integer
+        audit_logs:
+          type: integer
+
+    AdminUser:
+      type: object
+      required: [id, email, role, created_at]
+      properties:
+        id:
+          type: integer
+        auth_user_id:
+          type: ["string", "null"]
+        email:
+          type: string
+        username:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [user, admin]
+        telegram_status:
+          type: ["string", "null"]
+        telegram_username:
+          type: ["string", "null"]
+        wallet_address:
+          type: ["string", "null"]
+        referral_code:
+          type: ["string", "null"]
+        created_at:
+          type: string
+
+    AdminUserList:
+      type: object
+      required: [data, total]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminUser"
+        total:
+          type: integer
+        page:
+          type: ["integer", "null"]
+        limit:
+          type: ["integer", "null"]
+
+    AdminPayoutList:
+      type: object
+      required: [data, total]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Payout"
+        total:
+          type: integer
+        page:
+          type: ["integer", "null"]
+        limit:
+          type: ["integer", "null"]
+
+    ExpireResult:
+      type: object
+      required: [expired]
+      properties:
+        expired:
+          type: integer
+
+    ReferralList:
+      type: object
+      required: [data, total]
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        total:
+          type: integer
+
+    PayoutApproveInput:
+      type: object
+      required: [tx_signature]
+      properties:
+        tx_signature:
+          type: string
+
+    PayoutRejectInput:
+      type: object
+      required: [rejection_reason]
+      properties:
+        rejection_reason:
+          type: string

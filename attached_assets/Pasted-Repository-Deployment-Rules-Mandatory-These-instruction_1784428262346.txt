@@ -1,0 +1,118 @@
+Repository & Deployment Rules (Mandatory)
+
+These instructions are mandatory.
+
+Do not change the deployment strategy or repository structure.
+
+⸻
+
+Current Task
+
+You are working only on the Website repository.
+
+Do not commit, modify, or push changes to the Telegram bot repository.
+
+If, during implementation, you discover that the Telegram bot requires changes to remain compatible with the website, do not implement those changes.
+
+Instead:
+
+* Clearly explain why the bot needs to change.
+* Specify the exact files that need modification.
+* Describe the required changes in detail.
+* Explain why those changes are necessary.
+
+I will implement those bot changes manually in the bot repository.
+
+⸻
+
+GitHub Workflow
+
+Only the Website repository will receive commits and be pushed to GitHub.
+
+When the backend work is complete:
+
+* Commit all website changes.
+* Push only the website repository to the new GitHub repository.
+
+Do not attempt to clone, modify, commit, or push the Telegram bot repository.
+
+The bot repository is maintained separately.
+
+⸻
+
+Deployment Architecture
+
+Website Frontend
+
+* Vercel
+
+Website Backend/API
+
+* Render
+
+Telegram Bot
+
+* Render (separate deployment)
+
+Supabase
+
+* Shared between both projects
+
+This deployment architecture must not change.
+
+⸻
+
+Shared Database
+
+The website and Telegram bot share the same Supabase project.
+
+Supabase is the single source of truth.
+
+Do not duplicate:
+
+* Users
+* Authentication
+* Challenges
+* Referrals
+* Analytics
+* Business logic
+
+Reuse the existing schema wherever possible.
+
+⸻
+
+If Bot Changes Are Required
+
+If compatibility requires changes to the Telegram bot, provide a report using this format:
+
+Bot Changes Required
+
+Reason:
+
+(Explain why the change is necessary.)
+
+Affected File(s):
+
+(List the exact files.)
+
+Required Changes:
+
+(Describe precisely what needs to be added, removed, or modified.)
+
+Expected Result:
+
+(Explain how this restores compatibility with the website.)
+
+Do not implement these changes yourself.
+
+I will apply them manually in the bot repository.
+
+⸻
+
+Goal
+
+Your objective is to make the website backend fully functional while preserving compatibility with the existing Telegram bot.
+
+Only modify the website repository.
+
+If the bot needs updates, document them instead of implementing them.

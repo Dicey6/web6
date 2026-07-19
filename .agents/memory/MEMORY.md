@@ -1,0 +1,1 @@
+- [FundedFrens backend recovery](fundedfrens-backend.md) — port collision fix, Express 5 typing quirk, bot token expiry via updated_at, admin payouts returns plain array.

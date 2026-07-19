@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+assets/fonts/*.ttf
+assets/fonts/*.woff*
+*.log
+.DS_Store

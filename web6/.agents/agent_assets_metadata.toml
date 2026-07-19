@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "LmYTgaRinCQGFf5grRV5k"
+uri = "file://fundedfrens_summary.txt"
+type = "text"
+title = "FundedFrens Repo Summary"

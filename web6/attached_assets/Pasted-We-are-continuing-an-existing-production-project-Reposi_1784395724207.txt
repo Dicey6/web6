@@ -1,0 +1,212 @@
+We are continuing an existing production project.
+
+Repository:
+https://github.com/Dicey6/web6
+
+IMPORTANT
+
+This is NOT a new project.
+
+Do NOT rebuild anything.
+
+Do NOT redesign the UI.
+
+Do NOT change the architecture.
+
+The project was previously functional. Login and signup worked before. The issue was introduced after recent changes, so assume this is a regression in the code unless proven otherwise.
+
+Your job is to restore full functionality while preserving the current UI.
+
+====================================================
+PROJECT ARCHITECTURE
+====================================================
+
+Frontend:
+- Next.js 15
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+- Hosted on Vercel
+
+Backend:
+- FastAPI (Python)
+- Hosted on Render
+
+Database:
+- Supabase PostgreSQL
+
+Authentication:
+- Supabase Auth (Email/Password)
+
+Source Control:
+- GitHub
+
+Deployment Flow:
+
+Replit
+↓
+
+GitHub
+
+↓
+
+Vercel (Frontend)
+
+↓
+
+Render (Backend)
+
+↓
+
+Supabase (Database & Auth)
+
+Do NOT change this architecture.
+
+====================================================
+PRIMARY OBJECTIVE
+====================================================
+
+Investigate why authentication no longer works.
+
+The UI is acceptable.
+
+The functionality is the priority.
+
+Find the exact regression.
+
+Do not guess.
+
+====================================================
+CHECK THE FOLLOWING
+====================================================
+
+Frontend
+
+- Login page
+- Register page
+- Auth provider
+- Middleware
+- Session management
+- Route protection
+- Redirect logic
+- API requests
+- Supabase client configuration
+
+Backend
+
+- Authentication middleware
+- JWT validation
+- API routes
+- CORS
+- Environment variable usage
+
+Database
+
+- Profile creation
+- User lookup
+- Foreign keys
+- Existing queries
+
+====================================================
+VERIFY THE COMPLETE FLOW
+====================================================
+
+Registration
+
+↓
+
+Email verification (if enabled)
+
+↓
+
+Login
+
+↓
+
+Session creation
+
+↓
+
+Dashboard access
+
+↓
+
+Logout
+
+Every step must function correctly.
+
+====================================================
+DO NOT CHANGE
+====================================================
+
+- UI design
+- Architecture
+- Database schema
+- Business logic
+- Payment flow
+- Referral system
+- Challenge system
+
+Only fix confirmed bugs.
+
+====================================================
+DEPLOYMENT REQUIREMENTS
+====================================================
+
+The repository must remain deployable.
+
+Frontend deployment:
+
+GitHub
+↓
+
+Vercel
+
+Backend deployment:
+
+GitHub
+↓
+
+Render
+
+Database:
+
+Supabase
+
+If you modify environment variable usage, document exactly which variables are required.
+
+Do not hardcode secrets.
+
+====================================================
+WHEN FINISHED
+====================================================
+
+Provide a report containing:
+
+1. Root cause of the authentication issue.
+
+2. Files modified.
+
+3. Exactly what was fixed.
+
+4. Confirmation that:
+
+✓ Registration works
+
+✓ Login works
+
+✓ Logout works
+
+✓ Sessions persist
+
+✓ Protected routes work
+
+✓ Dashboard loads
+
+✓ Backend communication works
+
+✓ Project builds successfully
+
+✓ Project is ready for GitHub, Vercel, Render and Supabase deployment
+
+Commit all fixes and ensure the repository remains production-ready.
