@@ -92,6 +92,7 @@ export const orders = pgTable('orders', {
   expiry_time: timestamp('expiry_time', { withTimezone: true }),
   payment_status: text('payment_status'),
   tx_signature: text('tx_signature'),
+  received_sol: numeric('received_sol', { precision: 10, scale: 6 }),
   referral_code: text('referral_code'),
   confirmed_at: timestamp('confirmed_at', { withTimezone: true }),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

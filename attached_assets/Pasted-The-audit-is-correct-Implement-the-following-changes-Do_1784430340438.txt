@@ -1,0 +1,321 @@
+The audit is correct.
+
+Implement the following changes.
+
+Do not redesign the UI.
+
+Do not change the project architecture.
+
+Do not refactor unrelated code.
+
+Only implement the functionality described below.
+
+⸻
+
+1. Challenge Plans
+
+Do NOT rely on database-seeded plans.
+
+The platform has only three official challenge plans and they rarely change.
+
+Hardcode these plans in the backend as the canonical source.
+
+Plan 1
+
+Challenge Fee:
+$15 USD
+
+Funded Account Value:
+Approximately $350 USD
+(~5 SOL depending on the current SOL price)
+
+⸻
+
+Plan 2
+
+Challenge Fee:
+$25 USD
+
+Funded Account Value:
+Approximately $1,100 USD
+(~15 SOL depending on the current SOL price)
+
+⸻
+
+Plan 3
+
+Challenge Fee:
+$50 USD
+
+Funded Account Value:
+Approximately $3,500 USD
+(~45 SOL depending on the current SOL price)
+
+⸻
+
+The USD values are the permanent source of truth.
+
+The funded SOL amount must never be stored as a fixed value.
+
+Instead:
+
+* Fetch the latest SOL/USD market price from a reliable provider.
+* Dynamically calculate the funded SOL amount.
+
+Example:
+
+fundedSOL = fundedUsdValue / currentSOLPrice
+
+This keeps every funded account approximately equal in USD regardless of market fluctuations.
+
+The website should display values similar to:
+
+* $350 (~5 SOL)
+* $1,100 (~15 SOL)
+* $3,500 (~45 SOL)
+
+using the latest SOL price.
+
+⸻
+
+2. Automatic On-Chain Payment Verification
+
+Replace the current payment confirmation flow with fully automatic blockchain verification.
+
+Do NOT require:
+
+* “I’ve Sent Payment”
+* Transaction signature input
+* Manual administrator confirmation
+
+The payment process should be completely automatic.
+
+The frontend must never communicate directly with the Solana blockchain.
+
+The frontend must never contain RPC URLs or API keys.
+
+All blockchain communication must happen securely on the backend.
+
+Architecture:
+
+Website (Vercel)
+
+↓
+
+Backend/API (Render)
+
+↓
+
+Helius RPC
+
+↓
+
+Solana Blockchain
+
+Use Helius as the Solana RPC provider.
+
+Configure it using environment variables only.
+
+Example:
+
+HELIUS_RPC_URL=https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}
+
+Never hardcode RPC endpoints or API keys.
+
+⸻
+
+Purchase Flow
+
+The complete purchase flow should become:
+
+Select Challenge
+
+↓
+
+Backend creates Pending Payment order
+
+↓
+
+Backend fetches current SOL/USD price
+
+↓
+
+Backend calculates exact SOL required
+
+↓
+
+Website displays:
+
+* Treasury wallet
+* Exact SOL amount
+* USD equivalent
+* Payment countdown
+
+↓
+
+User sends SOL
+
+↓
+
+Frontend polls backend every 5–10 seconds
+
+↓
+
+Backend verifies payment using Helius
+
+↓
+
+Payment detected automatically
+
+↓
+
+Store:
+
+* Transaction signature
+* Payment amount
+* Payment timestamp
+
+↓
+
+Order automatically becomes Paid
+
+↓
+
+Challenge automatically becomes Active
+
+↓
+
+Referral rewards process automatically
+
+↓
+
+Dashboard updates automatically
+
+No manual confirmation should be required.
+
+⸻
+
+Blockchain Verification
+
+The backend should verify that:
+
+* The payment arrived at the configured treasury wallet.
+* The received amount matches the expected SOL amount (allowing a small configurable tolerance for rounding if necessary).
+* The payment arrived before the order expired.
+* The transaction has not already been processed.
+
+After successful verification:
+
+* Mark the order as Paid.
+* Activate the purchased challenge.
+* Trigger the existing referral logic.
+* Update all related records.
+
+⸻
+
+Security
+
+Prevent:
+
+* Duplicate confirmations
+* Replay attacks
+* Processing the same transaction multiple times
+* Double challenge activation
+* Expired orders being activated
+
+The same blockchain transaction must never activate more than one order.
+
+⸻
+
+Frontend
+
+The frontend should only display payment status.
+
+While an order is pending, poll the backend every 5–10 seconds.
+
+Possible states:
+
+* Pending Payment
+* Waiting for Confirmation
+* Payment Confirmed
+* Payment Expired
+
+Stop polling immediately once the payment is confirmed or the order expires.
+
+No blockchain logic should exist in the browser.
+
+⸻
+
+3. Referrals
+
+Leave the referral system exactly as it currently works.
+
+Once payment is automatically confirmed:
+
+* Activate the purchased challenge.
+* Credit the referral commission.
+* Update all related records.
+
+Do not modify the referral business logic.
+
+⸻
+
+4. Architecture Rules
+
+Do NOT redesign anything.
+
+Do NOT replace the UI.
+
+Do NOT change routing.
+
+Do NOT refactor unrelated code.
+
+Do NOT introduce unnecessary abstractions.
+
+Keep the existing project structure intact.
+
+Only implement the missing backend functionality.
+
+⸻
+
+5. Performance
+
+Keep blockchain verification efficient.
+
+Do not continuously scan the blockchain.
+
+Only verify orders that are currently in the Pending Payment state.
+
+Stop verification immediately after an order is confirmed or expires.
+
+Cache the SOL/USD price briefly to reduce unnecessary API requests.
+
+⸻
+
+6. Before Completion
+
+Verify:
+
+* Challenge plans load correctly.
+* USD values remain fixed.
+* Funded SOL values update dynamically using the latest SOL/USD price.
+* Orders are created successfully.
+* Automatic blockchain verification works correctly.
+* Payments are detected without user interaction.
+* Orders automatically become Paid.
+* Challenges automatically activate.
+* Referral rewards trigger correctly.
+* Duplicate transactions cannot be reused.
+* Expired orders cannot be activated.
+* Dashboard updates correctly after payment.
+
+When finished, provide a report containing:
+
+* Every modified file.
+* Every backend change.
+* Any new database columns required.
+* Any API changes.
+* Every required environment variable.
+* Confirmation that the challenge purchase flow now supports fully automatic on-chain payment verification using Helius while preserving the existing project architecture.
+
+Do not modify any functionality outside the scope of this task.
