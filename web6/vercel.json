@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm --filter @workspace/fundedfrens run build",
+  "buildCommand": "pnpm --filter \"./artifacts/fundedfrens\" run build",
   "outputDirectory": "artifacts/fundedfrens/dist",
   "installCommand": "pnpm install",
   "framework": null,
