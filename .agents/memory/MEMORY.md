@@ -1,1 +1,1 @@
-- [FundedFrens backend recovery](fundedfrens-backend.md) — port collision fix, Express 5 typing quirk, bot token expiry via updated_at, admin payouts returns plain array.
+- [FundedFrens backend](fundedfrens-backend.md) — hardcoded plans, Helius auto-payment, received_sol column, port collision fix, Express 5 typing, bot token expiry via updated_at.

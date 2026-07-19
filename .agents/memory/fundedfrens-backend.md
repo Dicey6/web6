@@ -1,9 +1,9 @@
 ---
 name: FundedFrens backend recovery
-description: Key decisions and quirks from the FundedFrens backend completion task — web6 repo only.
+description: Key decisions and quirks from the FundedFrens backend — web6 repo.
 ---
 
-# FundedFrens Backend Recovery
+# FundedFrens Backend
 
 ## Architecture
 - **Monorepo root:** `/home/runner/workspace/web6`
@@ -11,23 +11,36 @@ description: Key decisions and quirks from the FundedFrens backend completion ta
 - **API server:** `web6/artifacts/api-server` — Express 5, preview path `/api`, port 8080
 - **DB package:** `web6/lib/db` — Drizzle ORM on Supabase PostgreSQL
 - **Spec:** `web6/lib/api-spec/openapi.yaml` → codegen via `pnpm --filter @workspace/api-spec run codegen`
-- **GitHub remote:** `https://github.com/Dicey6/web6.git` (push with `GITHUB_PERSONAL_ACCESS_TOKEN`)
+- **GitHub remote:** `https://github.com/Dicey6/web6.git` (push with `GITHUB_PERSONAL_ACCESS_TOKEN`; use `--force` if diverged on memory-only files)
+
+## Plans — hardcoded, not DB-seeded
+- Plans are defined in `artifacts/api-server/src/routes/plans.ts` as `HARDCODED_PLANS` (IDs 1/2/3, slugs starter/standard/elite).
+- USD price is the permanent source of truth; `funded_sol` is computed dynamically from live CoinGecko price (60s cache in `lib/solPrice.ts`).
+- Do NOT add a `challenge_plans` seed migration — plans are intentionally not in the DB.
+
+## Payment flow — fully automatic via Helius
+- `POST /v1/orders` creates order with live SOL price.
+- `GET /v1/orders/:orderId/payment-status` (polled by frontend every 5s) calls Helius via `lib/helius.ts` to check for matching on-chain payment.
+- On detection: atomic `UPDATE ... WHERE status='pending'` prevents double-activation; `activatePurchase()` creates `user_challenges`, credits referral, logs activity.
+- Required env var on Render: `HELIUS_RPC_URL=https://mainnet.helius-rpc.com/?api-key=<KEY>`
+
+## DB columns added
+- `orders.received_sol` (numeric 10,6) — migration: `ALTER TABLE orders ADD COLUMN IF NOT EXISTS received_sol numeric(10,6);`
+- `profiles.telegram_id`, `telegram_link_token`, `telegram_username` — added via frensbot migration 001.
 
 ## Bot compatibility constraint
-- The frensbot (separate repo, do NOT modify) checks `profiles.updated_at` to validate token age (10-min window).
-- The website's `POST /v1/users/telegram/token` intentionally updates `updated_at` when storing the token.
-- Do not add a separate `telegram_link_token_expires_at` column — the bot relies on `updated_at`.
+- The frensbot checks `profiles.updated_at` to validate token age (10-min window).
+- `POST /v1/users/telegram/token` updates `updated_at` when storing the token — intentional.
 
 ## Port collision issue (solved)
-- Both `artifacts/api-server` (old, root-level) and `web6/artifacts/api-server` use `localPort = 8080`.
-- The old workflow must be STOPPED (via `stopWorkflow`) before the web6 one can start.
-- Use `stopWorkflow({ name: "artifacts/api-server: API Server" })` in CodeExecution if it collides again.
+- Both `artifacts/api-server` (root-level) and `web6/artifacts/api-server` use port 8080.
+- Stop the root-level one before starting the web6 one if they collide.
 
 ## Express 5 typing quirk
-- `req.params.foo` is typed as `string | string[]` in Express 5 — always cast: `String(req.params.foo)` before passing to Drizzle `eq()`.
+- `req.params.foo` typed as `string | string[]` — always cast: `String(req.params.foo)`.
 
-## Referral commission rate
-- Fixed at 20% of `order.amount` (USD), credited in `referral_earnings` when `POST /v1/orders/:orderId/confirm` is called.
+## Referral commission
+- Fixed at 20% of `order.amount` (USD), credited in `referral_earnings` on auto-activation.
 
 ## Admin payouts response format
-- The frontend `admin/Payouts.tsx` expects a plain array (`.length`, `.map`), so `GET /v1/admin/payouts` returns `Payout[]` directly (no pagination wrapper).
+- Frontend expects plain array (`.map()`), so `GET /v1/admin/payouts` returns `Payout[]` directly.
